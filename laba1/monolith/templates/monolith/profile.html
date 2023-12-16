@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Привет {{ profile.username }}</h3>
+    {% if profile.avatar %}
+        <img style="max-height: 500px;" src="{{ profile.avatar.url }}" alt="Аватар">
+    {% else %}
+        <img style="max-height: 500px;" src="/files/photo/default.jpg" alt="Аватар дефолтный">
+    {% endif %}
+    <p>Ваше имя: {{ profile.name }}</p>
+    <p>Ваша фамилия: {{ profile.surname }}</p>
+    <p>Ваш логин: {{ profile.username }}</p>
+    <p>Ваша почта: {{ profile.email }}</p>
+    <a href="{% url 'update' profile.pk %}">Редактировать профиль</a>
+    <button type="submit" id="1" onclick="Btn()">Удалить профиль</button>
+    <form action="{% url 'delete' profile.id %}" method="POST" id="2" style="display: none">
+        {% csrf_token %}
+        <button type="submit">Подтвердить удаление</button>
+    </form>
+
+    <script>
+        function Btn()
+        {
+            document.getElementById('1').style.display = 'none';
+            document.getElementById('2').style.display = 'block';
+        }
+    </script>
+{% endblock %}
+

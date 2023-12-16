@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>{{ post.name }}</h3>
+{% if post.photo %}
+        <img style="max-height: 500px;" src="{{ ppost.photo.url }}" alt="Аватар">
+{% endif %}
+<p>{{ post.content }}</p>
+
+<h2>Votes</h2>
+<ul>
+  {% for vote in votes %}
+    <li>{{ vote.user }} - {{ vote.choice }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}
