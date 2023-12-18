@@ -3,9 +3,9 @@
 {% block content %}
     <h3>Привет {{ profile.username }}</h3>
     {% if profile.avatar %}
-        <img style="max-height: 500px;" src="{{ profile.avatar.url }}" alt="Аватар">
+        <img style="max-height: 50px;" src="{{ profile.avatar.url }}" alt="Аватар">
     {% else %}
-        <img style="max-height: 500px;" src="/files/photo/default.jpg" alt="Аватар дефолтный">
+        <img style="max-height: 50px;" src="/files/photo/default.jpg" alt="Аватар дефолтный">
     {% endif %}
     <p>Ваше имя: {{ profile.name }}</p>
     <p>Ваша фамилия: {{ profile.surname }}</p>

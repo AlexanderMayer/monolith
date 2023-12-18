@@ -19,27 +19,12 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['name', 'surname', 'username', 'email', 'password', 'avatar']
-        enctype = "multipart/form-data"
 
 
-class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['name', 'content', 'photo']
-        enctype = "multipart/form-data"
-
-
-class VoteForm(forms.ModelForm):
-    class Meta:
-        model = Vote
-        fields = ['choice']
-
-
-VoteFormSet = inlineformset_factory(
-    parent_model=Post,
-    model=Vote,
-    form=VoteForm,
-    fields=['choice'],
-    extra=3,
-    can_delete=False
-)
+class VoteForm(forms.Form):
+    name = forms.CharField(max_length=100, label='Название опроса')
+    content = forms.CharField(max_length=2000, widget=forms.Textarea(), label='Описание опроса')
+    photo = forms.ImageField(label='Фото для опроса')
+    choice1 = forms.CharField(max_length=100, label='Вариант 1')
+    choice2 = forms.CharField(max_length=100, label='Вариант 2')
+    choice3 = forms.CharField(max_length=100, label='Вариант 3')

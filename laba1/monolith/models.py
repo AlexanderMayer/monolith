@@ -24,9 +24,6 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')
     photo = models.ImageField(verbose_name='Фото', upload_to='photo', null=True, blank=True)
 
-    def was_published_recently(self):
-        return self.date_created >= timezone.now() - datetime.timedelta(days=1)
-
     def __str__(self):
         return self.name
 

@@ -1,8 +1,7 @@
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django.views.generic import *
 
@@ -17,7 +16,8 @@ class IndexView(generic.ListView):
     context_object_name = 'list'
 
     def get_queryset(self):
-        return Post.objects.order_by('-date_created')
+        return Post.objects.filter(date_created__gte=timezone.now() - datetime.timedelta(days=1)).order_by(
+            '-date_created')
 
 
 class Login(LoginView):
@@ -60,26 +60,68 @@ class DetailView(generic.DetailView):
     template_name = 'polls/detail.html'
     context_object_name = 'post'
 
+    # def dispatch(self, request, *args, **kwargs):
+    #     user = request.user.filter()
+    #
+    #
+    #     return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        post = self.object
+        post = Post.objects.get(id=self.kwargs['pk'])
         votes = Vote.objects.filter(post=post)
         context['votes'] = votes
+        context['post'] = post
         return context
+
+    def post(self, request):
+        question = request.POST['vote']
+        stub = Vote.objects.get(choise=question)
+        stub.votes += 1
+        return redirect(reverse_lazy('voted', kwargs={'pk': stub.post}))
+
+
+    # def post(self, request, **kwargs):
+    #     post = Post.objects.get(id=kwargs['pk'])
+    #
+    #     if request.POST.get('choice'):
+    #         vote = Vote.objects.get(choice=request.POST.get('choice'), post=post)
+    #         vote.votes += 1
+    #         vote.save()
+    #         return redirect(reverse('voted', kwargs={'pk': post.pk}))
+    #
+    #     return redirect('/')
 
 
 def create_post(request):
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)
-        formset = VoteFormSet(request.POST, prefix='votes')
-        if form.is_valid() and formset.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            formset.instance = post
-            formset.save()
-            return redirect('home')
-    else:
-        form = PostForm()
-        formset = VoteFormSet()
+        form = VoteForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            post_obj = Post.objects.create(
+                name=cd['name'],
+                content=cd['content'],
+                photo=cd['photo']
+            )
 
-    return render(request, 'polls/create.html', {'form': form, 'formset': formset})
+            Vote.objects.create(choice=cd['choice1'], post=post_obj, )
+            Vote.objects.create(choice=cd['choice2'], post=post_obj, )
+            Vote.objects.create(choice=cd['choice3'], post=post_obj, )
+            return redirect('/')
+    else:
+        form = VoteForm()
+        return render(request, 'polls/create.html', context={'form': form})
+
+
+class VotedView(generic.DetailView):
+    model = Post
+    template_name = 'polls/voted.html'
+    context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = Post.objects.get(id=self.kwargs['pk'])
+        votes = Vote.objects.filter(post=post)
+        context['votes'] = votes
+        context['post'] = post
+        return context

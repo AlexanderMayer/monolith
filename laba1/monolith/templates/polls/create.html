@@ -4,9 +4,6 @@
 <form method="post" action="" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    {% for form in formset %}
-    {{ form.as_p }}
-    {% endfor %}
     <input type="submit" value="Создать опрос">
 </form>
 {% endblock %}

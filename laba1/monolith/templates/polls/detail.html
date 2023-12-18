@@ -1,16 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3>{{ post.name }}</h3>
-{% if post.photo %}
-        <img style="max-height: 500px;" src="{{ ppost.photo.url }}" alt="Аватар">
-{% endif %}
-<p>{{ post.content }}</p>
+    <h3>{{ post.name }}</h3>
+    {% if post.photo %}
+        <img style="max-height: 500px;" src="{{ post.photo.url }}" alt="Аватар">
+    {% endif %}
+    <p>{{ post.content }}</p>
 
-<h2>Votes</h2>
-<ul>
-  {% for vote in votes %}
-    <li>{{ vote.user }} - {{ vote.choice }}</li>
-  {% endfor %}
-</ul>
+    <h3>Варианты ответа</h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for i in votes %}
+        <div>
+        <input type="radio" id="{{ i.id }}" name="vote"/>
+            <label for="{{ i.id }}">{{ i.choice }}</label>
+        </div>
+        {% endfor %}
+        <input type="submit" value="Проголосовать">
+    </form>
+
 {% endblock %}
