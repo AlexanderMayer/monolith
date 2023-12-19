@@ -11,5 +11,6 @@ urlpatterns = [
     path('update/<int:pk>', UserView.as_view(), name='update'),
     path('detail/<int:pk>', DetailView.as_view(), name='detail'),
     path('create/', create_post, name='create'),
-    path('detail/<int:pk>', VotedView.as_view(), name='voted'),
+    path('voted/<int:pk>', VotedView.as_view(), name='voted'),
+    path('polls', PollsList.as_view(), name='polls_list'),
 ]

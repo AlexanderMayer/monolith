@@ -17,6 +17,7 @@
     {% endif %}
     {% if user.is_superuser %}
         <a href="{% url 'create' %}">Создать опрос</a>
+        <a href="{% url 'polls_list' %}">Посмотреть все опросы</a>
     {% endif %}
     </nav>
     <main>

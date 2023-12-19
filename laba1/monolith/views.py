@@ -1,6 +1,8 @@
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render, redirect
+from django.db.models import *
+from django.db.models.functions import Cast
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django.views.generic import *
@@ -60,11 +62,17 @@ class DetailView(generic.DetailView):
     template_name = 'polls/detail.html'
     context_object_name = 'post'
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     user = request.user.filter()
-    #
-    #
-    #     return super().dispatch(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+        if UserVote.objects.filter(user=request.user, post=post.pk).exists():
+            var = int(kwargs['pk'])
+            return redirect(reverse('voted', args=(var,)))
+
+        stub = Post.objects.get(pk=kwargs['pk'])
+        if stub.was_published_recently():
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return redirect(reverse_lazy('voted', args=(kwargs['pk'],)))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -74,23 +82,15 @@ class DetailView(generic.DetailView):
         context['post'] = post
         return context
 
-    def post(self, request):
-        question = request.POST['vote']
-        stub = Vote.objects.get(choise=question)
-        stub.votes += 1
-        return redirect(reverse_lazy('voted', kwargs={'pk': stub.post}))
-
-
-    # def post(self, request, **kwargs):
-    #     post = Post.objects.get(id=kwargs['pk'])
-    #
-    #     if request.POST.get('choice'):
-    #         vote = Vote.objects.get(choice=request.POST.get('choice'), post=post)
-    #         vote.votes += 1
-    #         vote.save()
-    #         return redirect(reverse('voted', kwargs={'pk': post.pk}))
-    #
-    #     return redirect('/')
+    def post(self, request, pk):
+        post = self.get_object()
+        choice_id = request.POST.get('vote')
+        if choice_id:
+            vote = Vote.objects.get(id=choice_id, post=post)
+            vote.votes += 1
+            vote.save()
+            UserVote.objects.create(user=request.user, post=post)
+        return redirect('voted', pk=post.id)
 
 
 def create_post(request):
@@ -122,6 +122,19 @@ class VotedView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         post = Post.objects.get(id=self.kwargs['pk'])
         votes = Vote.objects.filter(post=post)
-        context['votes'] = votes
+        total_votes = sum(vote.votes for vote in votes)
+        vote_data = []
+        for vote in votes:
+            percent = (vote.votes / total_votes) * 100 if total_votes > 0 else 0
+            vote_data.append({'choice': vote.choice, 'percent': percent})
+        context['vote_data'] = vote_data
         context['post'] = post
         return context
+
+
+class PollsList(generic.ListView):
+    template_name = 'polls/polls_list.html'
+    context_object_name = 'list'
+
+    def get_queryset(self):
+        return Post.objects.all()

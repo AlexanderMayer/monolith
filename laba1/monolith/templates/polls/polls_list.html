@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>Опросы</h3>
+{% if list %}
+<ul>
+    {% for post in list %}
+    <li><a href="{% url 'detail' post.id %}">{{post.name}}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>
+    Нет опросов!
+</p>
+{% endif %}
+{% endblock %}
