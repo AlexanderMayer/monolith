@@ -18,7 +18,7 @@ class IndexView(generic.ListView):
     context_object_name = 'list'
 
     def get_queryset(self):
-        return Post.objects.filter(date_created__gte=timezone.now() - datetime.timedelta(days=1)).order_by(
+        return Post.objects.filter(date_created__gte=timezone.now() - datetime.timedelta(hours=1)).order_by(
             '-date_created')
 
 

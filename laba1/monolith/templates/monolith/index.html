@@ -3,6 +3,7 @@
 {% block title%}Главная{% endblock%}
 
 {% block content %}
+{% if user.is_authenticated %}
 <h3>Опросы</h3>
 {% if list %}
 <ul>
@@ -14,5 +15,6 @@
 <p>
     Нет опросов!
 </p>
+{% endif %}
 {% endif %}
 {% endblock %}
